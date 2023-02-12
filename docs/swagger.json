@@ -1,0 +1,274 @@
+{
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "title": "Api Documentation",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:81",
+    "basePath": "/",
+    "paths": {
+        "/health": {
+            "get": {
+                "tags": [
+                    "health-handler"
+                ],
+                "summary": "Health endpoint for kubernetes health and readiness check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": ""
+                        }
+                    }
+                }
+            }
+        },
+        "/parking/depart/{ticketNumber}": {
+            "get": {
+                "tags": [
+                    "Parking handler"
+                ],
+                "summary": "LeaveParkingSlot is function to use leaving vehicle from parking",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ticketNumber",
+                        "name": "ticketNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": ""
+                        }
+                    }
+                }
+            }
+        },
+        "/parking/entrance": {
+            "post": {
+                "tags": [
+                    "Parking handler"
+                ],
+                "summary": "GetParkingNumber is function to get unique parking number for vehicle",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Vehicle"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Ticket"
+                        }
+                    }
+                }
+            }
+        },
+        "/parking/stat": {
+            "get": {
+                "tags": [
+                    "Parking handler"
+                ],
+                "summary": "GetParkingSlots is function to get all parking slots",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Slot"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/calculate/{ticketNumber}": {
+            "get": {
+                "tags": [
+                    "Payment handler"
+                ],
+                "summary": "CalculatePayment is function to calculate parking amount",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ticketNumber",
+                        "name": "ticketNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PaymentInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/perform": {
+            "post": {
+                "tags": [
+                    "Payment handler"
+                ],
+                "summary": "PerformPayment is function to make payment",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.PerformPaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": ""
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.PaymentInfo": {
+            "type": "object",
+            "properties": {
+                "paymentDate": {
+                    "type": "string"
+                },
+                "paymentStatus": {
+                    "$ref": "#/definitions/model.PaymentStatus"
+                },
+                "price": {
+                    "type": "string"
+                },
+                "transactionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PaymentStatus": {
+            "type": "string",
+            "enum": [
+                "PAID",
+                "UNPAID"
+            ],
+            "x-enum-varnames": [
+                "Paid",
+                "UnPaid"
+            ]
+        },
+        "model.PerformPaymentRequest": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "ticketNumber": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Slot": {
+            "type": "object",
+            "properties": {
+                "IsEmpty": {
+                    "type": "boolean"
+                },
+                "slotNumber": {
+                    "type": "integer"
+                },
+                "slotType": {
+                    "$ref": "#/definitions/model.VehicleSize"
+                },
+                "vehicle": {
+                    "$ref": "#/definitions/model.Vehicle"
+                }
+            }
+        },
+        "model.Ticket": {
+            "type": "object",
+            "properties": {
+                "givenDate": {
+                    "type": "string"
+                },
+                "paymentInfo": {
+                    "$ref": "#/definitions/model.PaymentInfo"
+                },
+                "slotNumber": {
+                    "type": "integer"
+                },
+                "ticketNumber": {
+                    "type": "string"
+                },
+                "ticketStatus": {
+                    "$ref": "#/definitions/model.TicketStatus"
+                },
+                "vehicleNumber": {
+                    "type": "string"
+                },
+                "vehicleSize": {
+                    "$ref": "#/definitions/model.VehicleSize"
+                }
+            }
+        },
+        "model.TicketStatus": {
+            "type": "string",
+            "enum": [
+                "ACTIVE",
+                "INACTIVE"
+            ],
+            "x-enum-varnames": [
+                "Active",
+                "Inactive"
+            ]
+        },
+        "model.Vehicle": {
+            "type": "object",
+            "properties": {
+                "vehicleNumber": {
+                    "type": "string"
+                },
+                "vehicleSize": {
+                    "$ref": "#/definitions/model.VehicleSize"
+                }
+            }
+        },
+        "model.VehicleSize": {
+            "type": "string",
+            "enum": [
+                "TWO_WHEELER",
+                "FOUR_WHEELER"
+            ],
+            "x-enum-varnames": [
+                "TwoWheeler",
+                "FourWheeler"
+            ]
+        }
+    }
+}

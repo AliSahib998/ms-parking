@@ -1,9 +1,5 @@
 FROM golang:1.20-alpine3.17
 
-#RUN apk update
-#RUN apk add ca-certificates
-#RUN update-ca-certificates
-
 WORKDIR /app
 
 COPY ms-parking go.mod go.sum ./

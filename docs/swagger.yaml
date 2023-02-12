@@ -1,0 +1,178 @@
+basePath: /
+consumes:
+- application/json
+definitions:
+  model.PaymentInfo:
+    properties:
+      paymentDate:
+        type: string
+      paymentStatus:
+        $ref: '#/definitions/model.PaymentStatus'
+      price:
+        type: string
+      transactionId:
+        type: string
+    type: object
+  model.PaymentStatus:
+    enum:
+    - PAID
+    - UNPAID
+    type: string
+    x-enum-varnames:
+    - Paid
+    - UnPaid
+  model.PerformPaymentRequest:
+    properties:
+      price:
+        type: number
+      ticketNumber:
+        type: string
+    type: object
+  model.Slot:
+    properties:
+      IsEmpty:
+        type: boolean
+      slotNumber:
+        type: integer
+      slotType:
+        $ref: '#/definitions/model.VehicleSize'
+      vehicle:
+        $ref: '#/definitions/model.Vehicle'
+    type: object
+  model.Ticket:
+    properties:
+      givenDate:
+        type: string
+      paymentInfo:
+        $ref: '#/definitions/model.PaymentInfo'
+      slotNumber:
+        type: integer
+      ticketNumber:
+        type: string
+      ticketStatus:
+        $ref: '#/definitions/model.TicketStatus'
+      vehicleNumber:
+        type: string
+      vehicleSize:
+        $ref: '#/definitions/model.VehicleSize'
+    type: object
+  model.TicketStatus:
+    enum:
+    - ACTIVE
+    - INACTIVE
+    type: string
+    x-enum-varnames:
+    - Active
+    - Inactive
+  model.Vehicle:
+    properties:
+      vehicleNumber:
+        type: string
+      vehicleSize:
+        $ref: '#/definitions/model.VehicleSize'
+    type: object
+  model.VehicleSize:
+    enum:
+    - TWO_WHEELER
+    - FOUR_WHEELER
+    type: string
+    x-enum-varnames:
+    - TwoWheeler
+    - FourWheeler
+host: localhost:81
+info:
+  contact: {}
+  title: Api Documentation
+  version: "1.0"
+paths:
+  /health:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: ""
+      summary: Health endpoint for kubernetes health and readiness check
+      tags:
+      - health-handler
+  /parking/depart/{ticketNumber}:
+    get:
+      parameters:
+      - description: ticketNumber
+        in: path
+        name: ticketNumber
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: ""
+      summary: LeaveParkingSlot is function to use leaving vehicle from parking
+      tags:
+      - Parking handler
+  /parking/entrance:
+    post:
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Vehicle'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Ticket'
+      summary: GetParkingNumber is function to get unique parking number for vehicle
+      tags:
+      - Parking handler
+  /parking/stat:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Slot'
+            type: array
+      summary: GetParkingSlots is function to get all parking slots
+      tags:
+      - Parking handler
+  /payment/calculate/{ticketNumber}:
+    get:
+      parameters:
+      - description: ticketNumber
+        in: path
+        name: ticketNumber
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PaymentInfo'
+      summary: CalculatePayment is function to calculate parking amount
+      tags:
+      - Payment handler
+  /payment/perform:
+    post:
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.PerformPaymentRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: ""
+      summary: PerformPayment is function to make payment
+      tags:
+      - Payment handler
+produces:
+- application/json
+swagger: "2.0"
