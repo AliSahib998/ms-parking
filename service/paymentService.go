@@ -88,8 +88,9 @@ func (p *PaymentService) MakePayment(ctx context.Context, paymentRequest model.P
 }
 
 func calculateHoursPrice(seconds float64) string {
-	if seconds <= 10 {
+	//10 minutes = 3600 seconds
+	if seconds <= 3600 {
 		return "0"
 	}
-	return fmt.Sprintf("%.2f", ((seconds-10)*2)/10)
+	return fmt.Sprintf("%.2f", ((seconds-3600)*2)/3600)
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// HealthHandler just checking service is alive
 type HealthHandler struct {
 }
 

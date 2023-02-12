@@ -18,6 +18,7 @@ type parkingHandler struct {
 func NewParkingHandler(router *chi.Mux, parkingService service.IParkingService) *chi.Mux {
 	h := &parkingHandler{parkingService: parkingService}
 	router.Group(func(r chi.Router) {
+		//we can use this middleware for logging and adding header parameters
 		//router.Use(middleware.RequestParamsMiddleware)
 		router.Get("/parking/stat", errhandler.ErrorHandler(h.GetParkingSlots))
 		router.Post("/parking/entrance", errhandler.ErrorHandler(h.GetParkingNumber))

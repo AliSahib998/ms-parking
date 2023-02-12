@@ -88,12 +88,13 @@ func (p *ParkingService) GetParkingNumber(ctx context.Context, vehicle *model.Ve
 		}
 	}
 
+	//check ticket is null or no
 	if ticket == nil {
 		log.Info("not found any empty slot")
 		return nil, errhandler.NewNotFoundError("any empty slot not found", nil)
 	}
 
-	//update
+	//update slots and add ticket
 	slotByteArray, _ := json.Marshal(slots)
 	ticketByteArray, _ := json.Marshal(ticket)
 	p.redisClient.Set(ctx, model.SLOTS, slotByteArray, 0)
@@ -144,7 +145,6 @@ func (p *ParkingService) LeaveParkingSlot(ctx context.Context, ticketNumber stri
 		}
 	}
 
-	//update slots in redis
 	slotByteArray, _ := json.Marshal(slots)
 	p.redisClient.Set(ctx, model.SLOTS, slotByteArray, 0)
 	return nil
