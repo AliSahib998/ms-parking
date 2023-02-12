@@ -25,6 +25,12 @@ func NewPaymentHandler(router *chi.Mux, paymentService service.IPaymentService) 
 	return router
 }
 
+// CalculatePayment godoc
+// @Summary CalculatePayment is function to calculate parking amount
+// @Tags Payment handler
+// @Param ticketNumber path string true "ticketNumber"
+// @Success 200 {object} model.PaymentInfo
+// @Router /payment/calculate/{ticketNumber} [get]
 func (h *paymentHandler) CalculatePayment(w http.ResponseWriter, r *http.Request) error {
 	ticketNumber := chi.URLParam(r, "ticketNumber")
 	if len(ticketNumber) == 0 {
@@ -39,6 +45,12 @@ func (h *paymentHandler) CalculatePayment(w http.ResponseWriter, r *http.Request
 	return err
 }
 
+// PerformPayment godoc
+// @Summary PerformPayment is function to make payment
+// @Tags Payment handler
+// @Param request body model.PerformPaymentRequest true "request"
+// @Success 200 {} http.Response
+// @Router /payment/perform [post]
 func (h *paymentHandler) PerformPayment(w http.ResponseWriter, r *http.Request) error {
 	request := new(model.PerformPaymentRequest)
 	err := util.ParseRequest(r, request)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/AliSahib998/ms-parking/cache"
 	"github.com/AliSahib998/ms-parking/config"
+	_ "github.com/AliSahib998/ms-parking/docs"
 	"github.com/AliSahib998/ms-parking/handler"
 	"github.com/AliSahib998/ms-parking/model"
 	"github.com/AliSahib998/ms-parking/service"
@@ -14,6 +15,12 @@ import (
 	"strconv"
 )
 
+// @title Api Documentation
+// @version 1.0
+// @host localhost:81
+// @Accept json
+// @Produce json
+// @BasePath /
 func main() {
 	config.LoadConfig()
 	router := chi.NewRouter()

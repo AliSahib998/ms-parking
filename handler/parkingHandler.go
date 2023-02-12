@@ -27,6 +27,11 @@ func NewParkingHandler(router *chi.Mux, parkingService service.IParkingService) 
 	return router
 }
 
+// GetParkingSlots godoc
+// @Summary GetParkingSlots is function to get all parking slots
+// @Tags Parking handler
+// @Success 200 {object} []model.Slot
+// @Router /parking/stat [get]
 func (h *parkingHandler) GetParkingSlots(w http.ResponseWriter, r *http.Request) error {
 	slots, err := h.parkingService.GetParkingSlots(r.Context())
 	if err != nil {
@@ -37,6 +42,12 @@ func (h *parkingHandler) GetParkingSlots(w http.ResponseWriter, r *http.Request)
 	return err
 }
 
+// GetParkingNumber godoc
+// @Summary GetParkingNumber is function to get unique parking number for vehicle
+// @Tags Parking handler
+// @Param request body model.Vehicle true "request"
+// @Success 200 {object} model.Ticket
+// @Router /parking/entrance [post]
 func (h *parkingHandler) GetParkingNumber(w http.ResponseWriter, r *http.Request) error {
 	request := new(model.Vehicle)
 	err := util.ParseRequest(r, request)
@@ -53,6 +64,12 @@ func (h *parkingHandler) GetParkingNumber(w http.ResponseWriter, r *http.Request
 	return err
 }
 
+// LeaveParkingSlot godoc
+// @Summary LeaveParkingSlot is function to use leaving vehicle from parking
+// @Tags Parking handler
+// @Param ticketNumber path string true "ticketNumber"
+// @Success 200 {} http.Response
+// @Router /parking/depart/{ticketNumber} [get]
 func (h *parkingHandler) LeaveParkingSlot(w http.ResponseWriter, r *http.Request) error {
 	ticketNumber := chi.URLParam(r, "ticketNumber")
 	if len(ticketNumber) == 0 {
