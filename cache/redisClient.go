@@ -14,7 +14,6 @@ const connectionPoolSize = 4
 type IRedisClient interface {
 	Get(ctx context.Context, key string) *redis.StringCmd
 	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd
-	MSet(ctx context.Context, values ...interface{}) *redis.StatusCmd
 }
 
 // NewRedisClusterClient for prod env where we have redis cluster

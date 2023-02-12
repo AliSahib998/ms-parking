@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/AliSahib998/ms-parking/cache"
 	"github.com/AliSahib998/ms-parking/errhandler"
 	"github.com/AliSahib998/ms-parking/model"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -17,29 +15,21 @@ type IPaymentService interface {
 }
 
 type PaymentService struct {
-	redisClient cache.IRedisClient
+	redisHelper IRedisHelper
 }
 
-func PaymentServiceBuilder(redisClient cache.IRedisClient) *PaymentService {
+func PaymentServiceBuilder(redisHelper IRedisHelper) *PaymentService {
 	return &PaymentService{
-		redisClient: redisClient,
+		redisHelper: redisHelper,
 	}
 }
 
 func (p *PaymentService) CalculatePayment(ctx context.Context, ticketNumber string) (*model.PaymentInfo, error) {
 	//get ticket from database
-	var ticket *model.Ticket
-	var value, err = p.redisClient.Get(ctx, ticketNumber).Result()
-	if len(value) == 0 {
-		log.Info("this key is not exist in redis %s", ticketNumber)
-		return nil, errhandler.NewNotFoundError(fmt.Sprintf("ticket number %s is not found", ticketNumber), nil)
-	}
-	err = json.Unmarshal([]byte(value), &ticket)
+	var ticket, err = p.redisHelper.GetTicket(ctx, ticketNumber)
 	if err != nil {
-		log.Error("error occurred when unmarshalling:", err)
 		return nil, err
 	}
-
 	//check ticket status
 	if ticket.TicketStatus == model.Inactive || ticket.PaymentInfo.PaymentStatus == model.Paid {
 		return nil, errhandler.NewPaymentError("ticket status is inactive or payment is already paid", nil)
@@ -55,16 +45,8 @@ func (p *PaymentService) CalculatePayment(ctx context.Context, ticketNumber stri
 
 func (p *PaymentService) MakePayment(ctx context.Context, paymentRequest model.PerformPaymentRequest) error {
 	//get ticket from database
-	var ticket *model.Ticket
-	var value, err = p.redisClient.Get(ctx, paymentRequest.TicketNumber).Result()
-	if len(value) == 0 {
-		log.Info("this key is not exist in redis %s", paymentRequest.TicketNumber)
-		return errhandler.NewNotFoundError(fmt.Sprintf("ticket number %s is not found",
-			paymentRequest.TicketNumber), nil)
-	}
-	err = json.Unmarshal([]byte(value), &ticket)
+	var ticket, err = p.redisHelper.GetTicket(ctx, paymentRequest.TicketNumber)
 	if err != nil {
-		log.Error("error occurred when unmarshalling:", err)
 		return err
 	}
 
@@ -82,8 +64,7 @@ func (p *PaymentService) MakePayment(ctx context.Context, paymentRequest model.P
 
 	//update ticket in redis
 	ticketByteArray, _ := json.Marshal(ticket)
-	p.redisClient.Set(ctx, ticket.TicketNumber, ticketByteArray, 0)
-
+	err = p.redisHelper.Set(ctx, ticket.TicketNumber, ticketByteArray, 0)
 	return nil
 }
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/AliSahib998/ms-parking/cache"
 	"github.com/AliSahib998/ms-parking/errhandler"
 	"github.com/AliSahib998/ms-parking/model"
 	"github.com/AliSahib998/ms-parking/util"
@@ -19,45 +18,25 @@ type IParkingService interface {
 }
 
 type ParkingService struct {
-	redisClient cache.IRedisClient
+	redisHelper IRedisHelper
 }
 
-func ParkingBuilder(redisClient cache.IRedisClient) *ParkingService {
+func ParkingServiceBuilder(redisHelper IRedisHelper) *ParkingService {
 	return &ParkingService{
-		redisClient: redisClient,
+		redisHelper: redisHelper,
 	}
 }
 
 func (p *ParkingService) GetParkingSlots(ctx context.Context) ([]model.Slot, error) {
-	var slots []model.Slot
-	var value, err = p.redisClient.Get(ctx, model.SLOTS).Result()
-	if len(value) == 0 {
-		log.Info("this key is not exist in redis %s", model.SLOTS)
-		return slots, errhandler.NewNotFoundError("slots is not found", nil)
-	}
-	err = json.Unmarshal([]byte(value), &slots)
-	if err != nil {
-		log.Error("error occurred when unmarshalling:", err)
-	}
-
-	return slots, err
+	return p.redisHelper.GetSlots(ctx, model.SLOTS)
 }
 
 func (p *ParkingService) GetParkingNumber(ctx context.Context, vehicle *model.Vehicle) (*model.Ticket, error) {
-	var slots []*model.Slot
-	var value, err = p.redisClient.Get(ctx, model.SLOTS).Result()
-	if len(value) == 0 {
-		log.Info("this key is not exist in redis %s", model.SLOTS)
-		return nil, errhandler.NewNotFoundError("slots is not found", nil)
-	}
-	err = json.Unmarshal([]byte(value), &slots)
+	var slots, err = p.redisHelper.GetSlots(ctx, model.SLOTS)
 	if err != nil {
-		log.Error("error occurred when unmarshalling:", err)
 		return nil, err
 	}
-
 	var ticket *model.Ticket
-
 	//check vehicle number
 	for _, v := range slots {
 		if v.Vehicle != nil && v.Vehicle.VehicleNumber == vehicle.VehicleNumber {
@@ -97,25 +76,17 @@ func (p *ParkingService) GetParkingNumber(ctx context.Context, vehicle *model.Ve
 	//update slots and add ticket
 	slotByteArray, _ := json.Marshal(slots)
 	ticketByteArray, _ := json.Marshal(ticket)
-	p.redisClient.Set(ctx, model.SLOTS, slotByteArray, 0)
-	p.redisClient.Set(ctx, ticket.TicketNumber, ticketByteArray, 0)
+	_ = p.redisHelper.Set(ctx, model.SLOTS, slotByteArray, 0)
+	_ = p.redisHelper.Set(ctx, ticket.TicketNumber, ticketByteArray, 0)
 	return ticket, nil
 }
 
 func (p *ParkingService) LeaveParkingSlot(ctx context.Context, ticketNumber string) error {
 	//get ticket from database
-	var ticket *model.Ticket
-	var value, err = p.redisClient.Get(ctx, ticketNumber).Result()
-	if len(value) == 0 {
-		log.Info("this key is not exist in redis %s", ticketNumber)
-		return errhandler.NewNotFoundError(fmt.Sprintf("ticket number %s is not found", ticketNumber), nil)
-	}
-	err = json.Unmarshal([]byte(value), &ticket)
+	var ticket, err = p.redisHelper.GetTicket(ctx, ticketNumber)
 	if err != nil {
-		log.Error("error occurred when unmarshalling:", err)
 		return err
 	}
-
 	//check payment status for car leaving
 	if (ticket.PaymentInfo.PaymentStatus == model.UnPaid) ||
 		(ticket.PaymentInfo.PaymentStatus == model.Paid &&
@@ -125,17 +96,7 @@ func (p *ParkingService) LeaveParkingSlot(ctx context.Context, ticketNumber stri
 
 	//update slot status in parking
 	var slotNumber = ticket.SlotNumber
-	var slots []*model.Slot
-	var slotValue, slotErr = p.redisClient.Get(ctx, model.SLOTS).Result()
-	if len(slotValue) == 0 {
-		log.Info("this key is not exist in redis %s", model.SLOTS)
-		return errhandler.NewNotFoundError("slots were not found", nil)
-	}
-	slotErr = json.Unmarshal([]byte(slotValue), &slots)
-	if slotErr != nil {
-		log.Error("error occurred when unmarshalling:", err)
-		return err
-	}
+	slots, err := p.redisHelper.GetSlots(ctx, model.SLOTS)
 
 	for i, _ := range slots {
 		if slots[i].SlotNumber == slotNumber {
@@ -144,8 +105,7 @@ func (p *ParkingService) LeaveParkingSlot(ctx context.Context, ticketNumber stri
 			break
 		}
 	}
-
 	slotByteArray, _ := json.Marshal(slots)
-	p.redisClient.Set(ctx, model.SLOTS, slotByteArray, 0)
-	return nil
+	err = p.redisHelper.Set(ctx, model.SLOTS, slotByteArray, 0)
+	return err
 }

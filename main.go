@@ -49,8 +49,12 @@ func main() {
 	}
 	r, _ := json.Marshal(slot)
 	redisClient.Set(context.TODO(), model.SLOTS, r, 0)
-	var parkingService = service.ParkingBuilder(redisClient)
-	var paymentService = service.PaymentServiceBuilder(redisClient)
+
+	var redisHelper = &service.RedisHelper{
+		RedisClient: redisClient,
+	}
+	var parkingService = service.ParkingServiceBuilder(redisHelper)
+	var paymentService = service.PaymentServiceBuilder(redisHelper)
 	handler.NewParkingHandler(router, parkingService)
 	handler.NewPaymentHandler(router, paymentService)
 	handler.NewHealthHandler(router)
