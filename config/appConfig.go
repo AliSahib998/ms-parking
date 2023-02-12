@@ -6,22 +6,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const RootPath = "/v1/post"
-const PrivateRootPath = "/v1/private/post"
-
 type args struct {
-	LogLevel            string   `arg:"env:LOG_LEVEL"`
-	Port                int      `arg:"env:PORT"`
-	RedisURL            []string `arg:"env:REDIS_SERVER_URLS"`
-	DBB2BPostURL        string   `arg:"env:DB_B2B_POST_URL"`
-	DBB2BPostUser       string   `arg:"env:DB_B2B_POST_USER"`
-	DBB2BPostPass       string   `arg:"env:DB_B2B_POST_PASS"`
-	DBB2BPostName       string   `arg:"env:DB_B2B_POST_NAME"`
-	DBPoolSize          int      `arg:"env:DB_POOL_SIZE"`
-	DBConnectionTimeout string   `arg:"env:DB_CONNECTION_TIMEOUT"`
-	CustomerEndpoint    string   `arg:"env:MS_CUSTOMER_ENDPOINT,required"`
-	FileStorageEndpoint string   `arg:"env:MS_FILE_STORAGE_ENDPOINT,required"`
-	MaxFileUploadSize   int      `arg:"env:MAX_FILE_SIZE,required"`
+	LogLevel string   `arg:"env:LOG_LEVEL"`
+	Port     int      `arg:"env:PORT"`
+	RedisURL []string `arg:"env:REDIS_SERVER_URLS"`
 }
 
 // Props is global variable for environment variables usage
@@ -47,7 +35,6 @@ func initEnvVars() {
 	} else {
 		log.Info("Environment variables loaded from: profiles/default.env")
 	}
-	//http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 }
 
 func initLogger() {

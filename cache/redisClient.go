@@ -17,7 +17,7 @@ type IRedisClient interface {
 	MSet(ctx context.Context, values ...interface{}) *redis.StatusCmd
 }
 
-// NewRedisClusterClient for prod env
+// NewRedisClusterClient for prod env where we have redis cluster
 func NewRedisClusterClient() *redis.ClusterClient {
 	var addrs []string
 	for _, v := range config.Props.RedisURL {
@@ -38,6 +38,7 @@ func NewRedisClusterClient() *redis.ClusterClient {
 	return redis.NewClusterClient(opts)
 }
 
+// NewRedisClientForDev it is used for dev env
 func NewRedisClientForDev() *redis.Client {
 	var addrs []string
 	for _, v := range config.Props.RedisURL {

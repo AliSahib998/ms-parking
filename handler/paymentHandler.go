@@ -19,7 +19,7 @@ func NewPaymentHandler(router *chi.Mux, paymentService service.IPaymentService) 
 	h := &paymentHandler{paymentService: paymentService}
 	router.Group(func(r chi.Router) {
 		//router.Use(middleware.RequestParamsMiddleware)
-		router.Get("/payment/calculate", errhandler.ErrorHandler(h.CalculatePayment))
+		router.Get("/payment/calculate/{ticketNumber}", errhandler.ErrorHandler(h.CalculatePayment))
 		router.Post("/payment/perform", errhandler.ErrorHandler(h.PerformPayment))
 	})
 	return router

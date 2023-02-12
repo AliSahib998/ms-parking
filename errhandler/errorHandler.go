@@ -10,6 +10,7 @@ func ErrorHandler(h handlerFunc) http.HandlerFunc {
 		// Execute the final handler, and deal with errors
 		err := h(w, r)
 		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
 			switch e := err.(type) {
 			case *BadRequestError:
 				// We can retrieve the status here and write out a specific

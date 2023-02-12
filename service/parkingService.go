@@ -130,7 +130,7 @@ func (p *ParkingService) LeaveParkingSlot(ctx context.Context, ticketNumber stri
 		log.Info("this key is not exist in redis %s", model.SLOTS)
 		return errhandler.NewNotFoundError("slots were not found", nil)
 	}
-	slotErr = json.Unmarshal([]byte(value), &slots)
+	slotErr = json.Unmarshal([]byte(slotValue), &slots)
 	if slotErr != nil {
 		log.Error("error occurred when unmarshalling:", err)
 		return err

@@ -21,7 +21,7 @@ func NewParkingHandler(router *chi.Mux, parkingService service.IParkingService) 
 		//router.Use(middleware.RequestParamsMiddleware)
 		router.Get("/parking/stat", errhandler.ErrorHandler(h.GetParkingSlots))
 		router.Post("/parking/entrance", errhandler.ErrorHandler(h.GetParkingNumber))
-		router.Get("/parking/depart", errhandler.ErrorHandler(h.LeaveParkingSlot))
+		router.Get("/parking/depart/{ticketNumber}", errhandler.ErrorHandler(h.LeaveParkingSlot))
 	})
 	return router
 }

@@ -55,7 +55,6 @@ func (p *PaymentService) CalculatePayment(ctx context.Context, ticketNumber stri
 
 func (p *PaymentService) MakePayment(ctx context.Context, paymentRequest model.PerformPaymentRequest) error {
 	//get ticket from database
-	//get ticket from database
 	var ticket *model.Ticket
 	var value, err = p.redisClient.Get(ctx, paymentRequest.TicketNumber).Result()
 	if len(value) == 0 {
@@ -77,17 +76,20 @@ func (p *PaymentService) MakePayment(ctx context.Context, paymentRequest model.P
 	//perform payment (call any payment service)
 	ticket.PaymentInfo.Price = fmt.Sprintf("%f", paymentRequest.Price)
 	ticket.PaymentInfo.PaymentStatus = model.Paid
+	var currentTime = time.Now()
+	ticket.PaymentInfo.PaymentDate = &currentTime
 	ticket.TicketStatus = model.Inactive
 
 	//update ticket in redis
 	ticketByteArray, _ := json.Marshal(ticket)
 	p.redisClient.Set(ctx, ticket.TicketNumber, ticketByteArray, 0)
+
 	return nil
 }
 
 func calculateHoursPrice(seconds float64) string {
-	if seconds <= 3600 {
+	if seconds <= 10 {
 		return "0"
 	}
-	return fmt.Sprintf("%.2f", ((seconds-3600)*2)/3600)
+	return fmt.Sprintf("%.2f", ((seconds-10)*2)/10)
 }
