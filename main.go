@@ -55,7 +55,7 @@ func loadParkingSlots(client *redis.Client) {
 		var slot = model.Slot{
 			SlotNumber: rand.New(
 				rand.NewSource(time.Now().UnixNano())).Int(),
-			IsEmpty:  false,
+			IsEmpty:  true,
 			SlotType: slotType,
 			Vehicle:  nil,
 		}
